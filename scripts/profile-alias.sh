@@ -24,6 +24,18 @@ date
 echo ""
 EOF
 
-echo "alias l='ls -Alrth'" > ~/.ashrc
+cat << 'EOF' > ~/.ashrc
+# Colorize output and make formatting human-readable
+alias ls='ls --color=auto'
+alias l='ls --color=auto -Alrth'
+alias df='df -h'
+alias free='free -h'
+alias top='top -d 1'
+
+# Safety prompts to prevent accidental overwrites
+alias rm='rm -i'
+alias cp='cp -i'
+alias mv='mv -i'
+EOF
 
 source .ashrc

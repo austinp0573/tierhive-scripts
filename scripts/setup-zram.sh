@@ -1,9 +1,12 @@
 #!/bin/sh
 
+# https://wiki.alpinelinux.org/wiki/Zram
 # configure zram
 # change any of the given variables as necessary
 # lz4 requires the smallest amount of CPU
 # effort and is not bad in terms of compression ratio
+# https://linuxreviews.org/Comparison_of_Compression_Algorithms#zram_block_drive_compression
+# https://imgur.com/EDLZNUZ
 
 apk add --no-cache zram-init
 

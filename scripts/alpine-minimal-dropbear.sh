@@ -1,16 +1,15 @@
 #!/bin/sh
-
-# adapted from https://tierhive.com/blog/tierhive-howto/how-to-run-alpine-with-just-23mb-ram
-
 set -e
 
-# ensure script is run as root
+# Ensure script is run as root
 if [ "$(id -u)" -ne 0 ]; then
     echo "This script must be run as root."
     exit 1
 fi
 
-echo "1. Kernel Module Blacklist and Initramfs"
+echo ""
+echo "1: Kernel Module Blacklist and Initramfs"
+echo "---------------------------------------------"
 
 cat > /etc/modprobe.d/blacklist-unnecessary.conf << 'EOF'
 # Graphics (headless server)
@@ -75,14 +74,23 @@ sed -i 's/default_kernel_opts="/default_kernel_opts="ipv6.disable=1 audit=0 nowa
 
 mkinitfs
 
-echo "2. Remove Cloud-Init and python dependencies"
-echo "you can remove the py3-|python3|pyc part if you would like to keep python"
-echo "-------------------------------------------------------------------------"
+echo "2: Replace OpenSSH with Dropbear"
+echo "-----------------------------------------"
+apk add dropbear
 
+# We swap the startup services but do not stop sshd immediately. 
+# Stopping sshd here over an active SSH session will terminate the script execution.
+# The switch will safely take effect on reboot.
+rc-update del sshd default
+rc-update add dropbear default
+
+echo "3: Remove Cloud-Init and Python"
+echo "--------------------------------------------"
 # Remove cloud-init and python dependencies dynamically
 apk del $(grep "^P:" /lib/apk/db/installed | sed 's/^P://' | grep -E "^(cloud-init|cloud-utils|py3-|python3|pyc)")
 
-echo "3. Package Cleanup"
+echo "4: Package Cleanup"
+echo "-----------------------------------------"
 # Swap Chrony for Busybox ntpd
 if rc-service chronyd status 2>/dev/null; then
     rc-service chronyd stop
@@ -100,15 +108,20 @@ apk del readline gdbm mpdecimal sqlite-libs yaml p11-kit libtasn1 gnutls nettle 
 # Remove DHCP client (assuming static IP deployed)
 apk del dhcpcd dhcpcd-openrc
 
+# remove OpenSSH (done last as it may drop the current session upon package removal)
+apk del openssh openssh-client-common openssh-client-default openssh-keygen openssh-server openssh-server-common openssh-server-common-openrc openssh-server-pam openssh-sftp-server || true
+
 # Clear cache
 rm -rf /var/cache/apk/*
 
-echo "4. Service Cleanup"
+echo "5: Service Cleanup"
+echo "-------------------------------------"
 rc-update del acpid boot || true
 rc-update del hwclock boot || true
 rc-update del swap boot || true
 
-echo "5. System Tuning"
+echo "6: System Tuning"
+echo "--------------------------------------"
 
 # Suppress IPv6 sysctl errors since it's disabled in the kernel
 sed -i '/net\.ipv6/s/^/# /' /usr/lib/sysctl.d/00-alpine.conf
@@ -149,10 +162,6 @@ EOF
 chmod +x /etc/local.d/readahead.start
 rc-update add local default
 
-echo "minimal alpine script complete"
-echo "-------------------------------------------"
-echo "the tutorial switched openSSH for dropbear"
-echo "I am more comfortable with openSSH and it's"
-echo "worth the extra 5MB to me"
-
-# May need to alter this if I'm using IPv6
+echo ""
+echo "--------------------------------------------------------------------"
+echo "alpine-minimal-drobear.sh done, please reboot to apply all kernel and service changes."

@@ -30,5 +30,8 @@ echo "optimizing swappiness for low-RAM environment"
 echo "vm.swappiness=10" > /etc/sysctl.d/swap.conf
 sysctl -p /etc/sysctl.d/swap.conf
 
+echo ""
 echo "swap configuration complete"
+echo "---------------------------"
+
 free -h

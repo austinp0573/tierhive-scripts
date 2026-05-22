@@ -133,7 +133,7 @@ func main() {
 	var config Config
 
 	fmt.Println("=======================================")
-	fmt.Println("  Tusko Static Site Binary Generator")
+	fmt.Println("  Go Web Server/Static Site Binary Generator")
 	fmt.Println("=======================================")
 
 	// Cleanup previous staging directory if it exists
@@ -144,7 +144,7 @@ func main() {
 	for {
 		fmt.Printf("\n--- Site #%d ---\n", siteCount)
 		
-		domain := prompt(reader, "Domain endpoint (e.g., rex.tusko.org)", "")
+		domain := prompt(reader, "Domain endpoint (e.g., subdomain.example.com)", "")
 		if domain == "" {
 			fmt.Println("Domain cannot be empty. Try again.")
 			continue
@@ -203,7 +203,7 @@ func main() {
 	fmt.Println("\n--- Build & Optimization Configuration ---")
 	goos := prompt(reader, "Target OS (GOOS)", "linux")
 	goarch := prompt(reader, "Target Architecture (GOARCH)", "amd64")
-	outputName := prompt(reader, "Output binary name", "tusko-web")
+	outputName := prompt(reader, "Output binary name", "go-static-web-server")
 	
 	fmt.Println("\n[Alpine VPS Requirements]")
 	staticLink := prompt(reader, "Enable static linking (CGO_ENABLED=0)? (y/N)", "y")

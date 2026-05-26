@@ -1,0 +1,38 @@
+#!/usr/sbin/nft -f
+
+flush ruleset
+
+table inet filter {
+    chain input {
+        type filter hook input priority filter; policy drop;
+        
+        # Allow established traffic and loopback
+        ct state { established, related } accept
+        iif "lo" accept
+        
+        # Allow external inbound connections to required services
+        tcp dport {{ ansible_port }} accept
+        udp dport {{ wireguard_port }} accept
+    }
+
+    chain forward {
+        type filter hook forward priority filter; policy drop;
+        
+        # Allow established reply traffic between peers
+        ct state { established, related } accept
+
+        # --- DYNAMIC PEER ACCESS MATRIX ---
+        {% for peer in wireguard_peers %}
+        {% if peer.can_talk_to is defined and peer.can_talk_to | length > 0 %}
+        # Rules for {{ peer.name }}
+        {% for target in peer.can_talk_to %}
+        ip saddr {{ peer.ip }} ip daddr {{ target }} accept
+        {% endfor %}
+        {% endif %}
+        {% endfor %}
+    }
+
+    chain output {
+        type filter hook output priority filter; policy accept;
+    }
+}

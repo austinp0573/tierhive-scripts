@@ -1,0 +1,26 @@
+all:
+  hosts:
+    vpn-gateway:
+      # --- VPS CONNECTION DETAILS ---
+      ansible_host: 203.0.113.10       # REPLACE: Public IP of the VPS
+      ansible_port: 22                 # REPLACE: SSH Port
+      ansible_user: root               # REPLACE: Bootstrapping user
+      
+      # --- WIREGUARD SERVER DETAILS ---
+      wireguard_private_key: "SERVER_PRIVATE_KEY_HERE"
+      wireguard_ip: "10.0.0.1/24"
+      wireguard_port: 51820
+      
+      # --- PEER ACCESS ---
+      wireguard_peers:
+        - name: "admin-laptop"
+          ip: "10.0.0.2"
+          public_key: "ADMIN_LAPTOP_PUBLIC_KEY_HERE"
+          can_talk_to:
+            - "10.0.0.0/24"            # Full access to all peers
+            
+        - name: "restricted-client"
+          ip: "10.0.0.3"
+          public_key: "RESTRICTED_CLIENT_PUBLIC_KEY_HERE"
+          can_talk_to:
+            - "10.0.0.2/32"            # Can only communicate with admin-laptop

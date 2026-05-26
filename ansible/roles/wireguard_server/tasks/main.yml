@@ -1,0 +1,67 @@
+---
+- name: Ensure community repositories are available for networking tools
+  copy:
+    dest: /etc/apk/repositories
+    content: |
+      http://dl-cdn.alpinelinux.org/alpine/v3.23/main
+      http://dl-cdn.alpinelinux.org/alpine/v3.23/community
+    mode: '0644'
+
+- name: Update repository cache
+  apk:
+    update_cache: yes
+
+- name: Install routing, firewall, and WireGuard dependencies
+  apk:
+    name:
+      - bash
+      - iproute2
+      - nftables
+      - wireguard-tools
+    state: present
+
+- name: Enable IPv4 packet forwarding in kernel
+  sysctl:
+    name: net.ipv4.ip_forward
+    value: '1'
+    sysctl_set: yes
+    state: present
+    reload: yes
+
+- name: Create secure configuration directory for WireGuard
+  file:
+    path: /etc/wireguard
+    state: directory
+    mode: '0700'
+
+- name: Generate WireGuard interface configuration
+  template:
+    src: wg0.conf.j2
+    dest: /etc/wireguard/wg0.conf
+    mode: '0600'
+  notify: Restart wireguard
+
+- name: Generate nftables granular access matrix
+  template:
+    src: nftables.conf.j2
+    dest: /etc/nftables.nft
+    mode: '0744'
+  notify: Reload nftables
+
+- name: Enable and start nftables firewall
+  service:
+    name: nftables
+    enabled: yes
+    state: started
+
+- name: Symlink wg-quick to OpenRC init system
+  file:
+    src: /etc/init.d/wg-quick
+    dest: /etc/init.d/wg-quick.wg0
+    state: link
+
+- name: Enable and start WireGuard interface
+  service:
+    name: wg-quick.wg0
+    enabled: yes
+    state: started

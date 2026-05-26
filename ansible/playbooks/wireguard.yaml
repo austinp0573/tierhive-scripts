@@ -1,0 +1,11 @@
+---
+- name: Provision Minimal WireGuard Infrastructure
+  hosts: all
+  gather_facts: no
+  pre_tasks:
+    - name: Bootstrap Python for Ansible execution
+      raw: apk add --no-cache python3
+    - name: Gather facts after python is present
+      setup:
+  roles:
+    - wireguard_server

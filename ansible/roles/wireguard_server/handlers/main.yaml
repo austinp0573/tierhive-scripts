@@ -1,0 +1,8 @@
+---
+- name: Restart wireguard
+  service:
+    name: wg-quick.wg0
+    state: restarted
+
+- name: Reload nftables
+  command: nft -f /etc/nftables.nft

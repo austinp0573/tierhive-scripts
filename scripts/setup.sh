@@ -18,6 +18,22 @@ if [ "$(id -u)" -ne 0 ]; then
     exit 1
 fi
 
+# swap first (no network needed), then apk update, then zram
+
+echo ""
+echo "swap"
+sh "$SCRIPT_DIR/setup-swap.sh"
+_mark_run "setup-swap.sh"
+
+echo ""
+echo "refreshing package index"
+apk update
+
+echo ""
+echo "zram"
+sh "$SCRIPT_DIR/setup-zram.sh"
+_mark_run "setup-zram.sh"
+
 echo ""
 echo "tierhive vps setup"
 echo "=================="
@@ -49,22 +65,6 @@ case "$SSH_CHOICE" in
         _mark_run "alpine-minimal-dropbear.sh"
         ;;
 esac
-
-# swap first (no network needed), then apk update, then zram
-
-echo ""
-echo "swap"
-sh "$SCRIPT_DIR/setup-swap.sh"
-_mark_run "setup-swap.sh"
-
-echo ""
-echo "refreshing package index"
-apk update
-
-echo ""
-echo "zram"
-sh "$SCRIPT_DIR/setup-zram.sh"
-_mark_run "setup-zram.sh"
 
 # base packages
 

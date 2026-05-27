@@ -1,0 +1,19 @@
+---
+- name: Ensure Alpine repositories for WireGuard packages are present
+  lineinfile:
+    path: /etc/apk/repositories
+    line: "{{ item }}"
+    state: present
+    create: true
+    mode: '0644'
+  loop: "{{ wireguard_apk_repositories }}"
+  when: wireguard_manage_apk_repositories | bool
+
+- name: Update Alpine package cache
+  apk:
+    update_cache: true
+
+- name: Install WireGuard and firewall dependencies
+  apk:
+    name: "{{ wireguard_packages }}"
+    state: present

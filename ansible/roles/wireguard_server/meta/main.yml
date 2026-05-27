@@ -1,0 +1,12 @@
+---
+galaxy_info:
+  role_name: wireguard_server
+  description: Alpine WireGuard server with nftables peer access controls
+  author: austin
+  license: MIT
+  min_ansible_version: '2.14'
+  platforms:
+    - name: Alpine
+      versions:
+        - all
+dependencies: []

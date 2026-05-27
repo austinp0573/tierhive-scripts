@@ -1,26 +1,60 @@
 all:
   hosts:
     vpn-gateway:
-      # --- VPS CONNECTION DETAILS ---
-      ansible_host: 203.0.113.10       # REPLACE: Public IP of the VPS
-      ansible_port: 22                 # REPLACE: SSH Port
-      ansible_user: root               # REPLACE: Bootstrapping user
-      
-      # --- WIREGUARD SERVER DETAILS ---
-      wireguard_private_key: "SERVER_PRIVATE_KEY_HERE"
-      wireguard_ip: "10.0.0.1/24"
-      wireguard_port: 51820
-      
-      # --- PEER ACCESS ---
+      # copy this file to inventory/hosts.yaml and keep real keys out of git
+      ansible_host: 203.0.113.10
+      ansible_port: 22
+      ansible_user: root
+      ansible_ssh_private_key_file: "~/.ssh/your_key"
+      ansible_ssh_common_args: "-o IdentitiesOnly=yes"
+
+      # wireguard server settings
+      wireguard_private_key: "replace-with-server-private-key"
+      wireguard_public_key: "replace-with-server-public-key"
+      wireguard_interface: wg0
+      wireguard_address: "10.44.0.1/24"
+      wireguard_listen_port: 51820
+      wireguard_config_dir: /etc/wireguard
+      wireguard_config_path: "/etc/wireguard/wg0.conf"
+      wireguard_service_name: wg-quick.wg0
+
+      # public endpoint metadata for clients and nat notes
+      # the role does not currently configure this value on the server
+      wireguard_public_endpoint: "vpn.example.com:51820"
+      wireguard_public_endpoint_host: vpn.example.com
+      wireguard_public_endpoint_port: 51820
+      wireguard_public_endpoint_ip: the same ip as the ansible_host
+
+      # tighten these cidrs once you know where management traffic comes from
+      wireguard_ssh_allowed_cidrs:
+        - "0.0.0.0/0"
+      wireguard_udp_allowed_cidrs:
+        - "0.0.0.0/0"
+
+      # alpine package behavior
+      wireguard_manage_apk_repositories: true
+      wireguard_alpine_release: "3.23"
+      wireguard_apk_repositories:
+        - "https://dl-cdn.alpinelinux.org/alpine/v3.23/main"
+        - "https://dl-cdn.alpinelinux.org/alpine/v3.23/community"
+      wireguard_packages:
+        - iproute2
+        - nftables
+        - wireguard-tools
+
+      # nftables output path
+      wireguard_nftables_config_path: /etc/nftables.nft
+
+      # each peer can initiate connections only to its can_talk_to targets
       wireguard_peers:
-        - name: "admin-laptop"
-          ip: "10.0.0.2"
-          public_key: "ADMIN_LAPTOP_PUBLIC_KEY_HERE"
+        - name: admin-laptop
+          ip: "10.44.0.2"
+          public_key: "replace-with-admin-laptop-public-key"
           can_talk_to:
-            - "10.0.0.0/24"            # Full access to all peers
-            
-        - name: "restricted-client"
-          ip: "10.0.0.3"
-          public_key: "RESTRICTED_CLIENT_PUBLIC_KEY_HERE"
+            - "10.44.0.0/24"
+
+        - name: restricted-client
+          ip: "10.44.0.3"
+          public_key: "replace-with-restricted-client-public-key"
           can_talk_to:
-            - "10.0.0.2/32"            # Can only communicate with admin-laptop
+            - "10.44.0.2/32"

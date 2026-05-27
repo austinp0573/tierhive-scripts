@@ -1,8 +1,14 @@
 ---
 - name: Restart wireguard
   service:
-    name: wg-quick.wg0
+    name: "{{ wireguard_service_name }}"
     state: restarted
 
-- name: Reload nftables
-  command: nft -f /etc/nftables.nft
+- name: Validate nftables configuration
+  command: "nft --check --file {{ wireguard_nftables_config_path }}"
+  changed_when: false
+  listen: Reload nftables
+
+- name: Apply nftables configuration
+  command: "nft --file {{ wireguard_nftables_config_path }}"
+  listen: Reload nftables

@@ -1,11 +1,26 @@
 ---
-- name: Provision Minimal WireGuard Infrastructure
+- name: Provision WireGuard infrastructure
   hosts: all
-  gather_facts: no
+  gather_facts: false
   pre_tasks:
-    - name: Bootstrap Python for Ansible execution
-      raw: apk add --no-cache python3
+    - name: Bootstrap Python for Alpine hosts
+      raw: |
+        if [ ! -f /etc/alpine-release ]; then
+          echo "unsupported operating system: expected alpine linux" >&2
+          exit 1
+        fi
+
+        if command -v python3 >/dev/null 2>&1; then
+          echo "python3 already present"
+        else
+          apk add --no-cache python3
+          echo "python3 installed"
+        fi
+      register: wireguard_python_bootstrap
+      changed_when: "'python3 installed' in wireguard_python_bootstrap.stdout"
+
     - name: Gather facts after python is present
       setup:
+
   roles:
     - wireguard_server

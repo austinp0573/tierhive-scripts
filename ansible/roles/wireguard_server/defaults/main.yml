@@ -1,0 +1,25 @@
+---
+wireguard_interface: wg0
+wireguard_config_dir: /etc/wireguard
+wireguard_config_path: "{{ wireguard_config_dir }}/{{ wireguard_interface }}.conf"
+wireguard_service_name: "wg-quick.{{ wireguard_interface }}"
+
+wireguard_address: "{{ wireguard_ip | default('') }}"
+wireguard_listen_port: "{{ wireguard_port | default(51820) }}"
+wireguard_peers: []
+
+wireguard_nftables_config_path: /etc/nftables.nft
+wireguard_ssh_allowed_cidrs:
+  - 0.0.0.0/0
+wireguard_udp_allowed_cidrs:
+  - 0.0.0.0/0
+
+wireguard_manage_apk_repositories: true
+wireguard_alpine_release: "{{ ansible_distribution_version | regex_replace('^(\\d+\\.\\d+).*', '\\1') }}"
+wireguard_apk_repositories:
+  - "https://dl-cdn.alpinelinux.org/alpine/v{{ wireguard_alpine_release }}/main"
+  - "https://dl-cdn.alpinelinux.org/alpine/v{{ wireguard_alpine_release }}/community"
+wireguard_packages:
+  - iproute2
+  - nftables
+  - wireguard-tools

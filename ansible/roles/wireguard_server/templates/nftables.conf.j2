@@ -5,31 +5,34 @@ flush ruleset
 table inet filter {
     chain input {
         type filter hook input priority filter; policy drop;
-        
-        # Allow established traffic and loopback
+
+        # allow established traffic and loopback
         ct state { established, related } accept
-        iif "lo" accept
-        
-        # Allow external inbound connections to required services
-        tcp dport {{ ansible_port }} accept
-        udp dport {{ wireguard_port }} accept
+        iifname "lo" accept
+
+        # allow ssh management access
+{% for cidr in wireguard_ssh_allowed_cidrs | sort %}
+        ip saddr {{ cidr }} tcp dport {{ ansible_port | default(22) }} accept
+{% endfor %}
+
+        # allow wireguard tunnel ingress
+{% for cidr in wireguard_udp_allowed_cidrs | sort %}
+        ip saddr {{ cidr }} udp dport {{ wireguard_listen_port }} accept
+{% endfor %}
     }
 
     chain forward {
         type filter hook forward priority filter; policy drop;
-        
-        # Allow established reply traffic between peers
+
+        # allow replies for approved peer connections
         ct state { established, related } accept
 
-        # --- DYNAMIC PEER ACCESS MATRIX ---
-        {% for peer in wireguard_peers %}
-        {% if peer.can_talk_to is defined and peer.can_talk_to | length > 0 %}
-        # Rules for {{ peer.name }}
-        {% for target in peer.can_talk_to %}
-        ip saddr {{ peer.ip }} ip daddr {{ target }} accept
-        {% endfor %}
-        {% endif %}
-        {% endfor %}
+        # allow approved peer-initiated traffic through the tunnel
+{% for peer in wireguard_peers | sort(attribute='name') %}
+{% for target in peer.can_talk_to | default([]) | sort %}
+        iifname "{{ wireguard_interface }}" oifname "{{ wireguard_interface }}" ip saddr {{ peer.ip }} ip daddr {{ target }} accept
+{% endfor %}
+{% endfor %}
     }
 
     chain output {

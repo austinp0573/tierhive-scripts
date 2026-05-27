@@ -1,0 +1,7 @@
+---
+- name: Generate nftables WireGuard access policy
+  template:
+    src: nftables.conf.j2
+    dest: "{{ wireguard_nftables_config_path }}"
+    mode: '0644'
+  notify: Reload nftables

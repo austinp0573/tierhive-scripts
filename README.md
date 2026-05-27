@@ -1,10 +1,14 @@
 # tierhive-scripts
 
-[Tierhive](https://tierhive.com/) offers VPS instances starting at 128MB RAM and 1GB disk. These scripts set up and configure their Alpine Linux image for minimal resource usage, security, and day-to-day usability.
+[Tierhive](https://tierhive.com/) offers VPS instances starting at 128MB RAM and 1GB disk. This repo is for setting up and maintaining their Alpine Linux image with a small footprint and predictable configuration.
+
+The original shell scripts still work and are useful for one-off setup. I am moving the repeatable server configuration over to Ansible playbooks, starting with WireGuard, so the same repo can handle both a fresh VPS and later updates without redoing everything by hand.
 
 ## usage
 
-Run `setup.sh` first on a fresh VPS. It runs core setup in order, prompts for values where needed, and offers any remaining scripts at the end. Individual scripts can also be run standalone. `run-scripts.sh` walks through everything in the directory interactively.
+For the shell scripts, run `setup.sh` first on a fresh VPS. It runs core setup in order, prompts for values where needed, and offers any remaining scripts at the end. Individual scripts can also be run standalone. `run-scripts.sh` walks through everything in the directory interactively.
+
+For Ansible, start in `ansible/`. The current playbook provisions WireGuard on Alpine Linux with nftables-based peer access controls. See `ansible/README.md` for the inventory layout and WireGuard variables.
 
 ## scripts
 
@@ -23,11 +27,18 @@ Run `setup.sh` first on a fresh VPS. It runs core setup in order, prompts for va
 | `set-hostname.sh` | renames the system hostname cleanly |
 | `run-scripts.sh` | walks through every script in the directory and asks if you want to run it |
 
+## ansible
+
+The Ansible work is the direction this repo is moving. The goal is to keep server configuration idempotent, modular, and safe to rerun. For now, the Ansible scope is intentionally narrow: WireGuard server setup on Alpine Linux, including package setup, forwarding, nftables rules, and peer access controls.
+
+The base scripts still exist because they are convenient and because not everything has been moved yet. If you plan to manage a host with Ansible, do not remove Python from that host (at present the minimal scripts remove python).
+
 ## notes
 
 - everything here is Alpine Linux only. don't run these on anything else.
 - these reflect my personal setup preferences. read them before you run them.
-- all scripts must be run as root.
+- shell scripts must be run as root.
+- real inventories, keys, and host-specific values should stay out of git.
 
 ---
 

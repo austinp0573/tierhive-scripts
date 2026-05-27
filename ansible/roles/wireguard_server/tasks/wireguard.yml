@@ -1,0 +1,14 @@
+---
+- name: Create secure WireGuard configuration directory
+  file:
+    path: "{{ wireguard_config_dir }}"
+    state: directory
+    mode: '0700'
+
+- name: Generate WireGuard interface configuration
+  template:
+    src: wg0.conf.j2
+    dest: "{{ wireguard_config_path }}"
+    mode: '0600'
+  no_log: true
+  notify: Restart wireguard

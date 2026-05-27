@@ -1,0 +1,18 @@
+---
+- name: Create WireGuard OpenRC service link
+  file:
+    src: /etc/init.d/wg-quick
+    dest: "/etc/init.d/{{ wireguard_service_name }}"
+    state: link
+
+- name: Enable and start nftables
+  service:
+    name: nftables
+    enabled: true
+    state: started
+
+- name: Enable and start WireGuard interface
+  service:
+    name: "{{ wireguard_service_name }}"
+    enabled: true
+    state: started

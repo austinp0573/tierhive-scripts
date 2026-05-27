@@ -1,3 +1,10 @@
 .history
 *bin
 original.png
+hosts.yaml
+ansible/inventory/hosts.yaml
+ansible/inventory/*.local.yaml
+ansible/inventory/*.vault.yaml
+ansible/inventory/*.vault.yml
+ansible/.vault_pass
+*.retry

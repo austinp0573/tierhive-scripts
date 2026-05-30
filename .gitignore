@@ -8,3 +8,5 @@ ansible/inventory/*.vault.yaml
 ansible/inventory/*.vault.yml
 ansible/.vault_pass
 *.retry
+scripts.tar.xz
+scratch/*

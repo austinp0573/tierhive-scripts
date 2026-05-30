@@ -12,6 +12,8 @@ This playbook provisions an Alpine Linux WireGuard gateway with nftables-based p
 
 2. Fill in the server address, SSH settings, WireGuard server private key, and peer public keys in `inventory/hosts.yaml`.
 
+   If SSH is forwarded through NAT, use `ansible_port` for the public port you connect to and `wireguard_ssh_listen_port` for the port sshd listens on inside the VPS/VPC.
+
 3. Run the playbook from this directory:
 
    ```sh
@@ -47,6 +49,7 @@ In this example, `restricted-client` can start connections to `admin-laptop`, bu
 - `wireguard_address`: server tunnel address with CIDR, such as `10.44.0.1/24`.
 - `wireguard_listen_port`: UDP port for WireGuard.
 - `wireguard_interface`: interface name, defaulting to `wg0`.
+- `wireguard_ssh_listen_port`: SSH port on the VPS itself. this may differ from `ansible_port` when SSH is forwarded through NAT.
 - `wireguard_ssh_allowed_cidrs`: source CIDRs allowed to reach SSH.
 - `wireguard_udp_allowed_cidrs`: source CIDRs allowed to reach the WireGuard UDP port.
 - `wireguard_peers`: peer definitions and their source-initiated access rules.

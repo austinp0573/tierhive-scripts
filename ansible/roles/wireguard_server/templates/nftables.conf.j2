@@ -12,7 +12,7 @@ table inet filter {
 
         # allow ssh management access
 {% for cidr in wireguard_ssh_allowed_cidrs | sort %}
-        ip saddr {{ cidr }} tcp dport {{ ansible_port | default(22) }} accept
+        ip saddr {{ cidr }} tcp dport {{ wireguard_ssh_listen_port }} accept
 {% endfor %}
 
         # allow wireguard tunnel ingress

@@ -9,6 +9,7 @@ wireguard_listen_port: "{{ wireguard_port | default(51820) }}"
 wireguard_peers: []
 
 wireguard_nftables_config_path: /etc/nftables.nft
+wireguard_ssh_listen_port: 22
 wireguard_ssh_allowed_cidrs:
   - 0.0.0.0/0
 wireguard_udp_allowed_cidrs:

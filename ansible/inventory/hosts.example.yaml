@@ -3,10 +3,15 @@ all:
     vpn-gateway:
       # copy this file to inventory/hosts.yaml and keep real keys out of git
       ansible_host: 203.0.113.10
-      ansible_port: 22
+      ansible_port: 2222
       ansible_user: root
       ansible_ssh_private_key_file: "~/.ssh/your_key"
       ansible_ssh_common_args: "-o IdentitiesOnly=yes"
+
+      # ssh through nat
+      # ansible_port is the public port you connect to
+      # wireguard_ssh_listen_port is the port sshd listens on inside the vpc
+      wireguard_ssh_listen_port: 22
 
       # wireguard server settings
       wireguard_private_key: "replace-with-server-private-key"
